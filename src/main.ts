@@ -5,7 +5,6 @@ import { IBuyer, IApi, IOrderRequest } from './types';
 import { apiProducts } from './utils/data';
 import { ProductCatalog } from './components/models/ProductCatalog';
 import { API_URL, settings } from './utils/constants';
-import { Api } from './components/base/Api';
 import { WebLarekApi } from './components/communication/WebLarekApi';
 
 // тесты продуктового каталога:
@@ -59,10 +58,12 @@ console.log('Проверка, что переданные строки в ин�
 dianaModel.clearBuyerData();
 console.log('Данные о пользователе очищены: ', dianaModel);
 
-
-const baseApi: IApi = new Api(API_URL, settings);
-const api = new WebLarekApi(baseApi);
-const products = await api.fetchProducts(); 
 const productsApiModel = new ProductCatalog();
-productsApiModel.productsList = products;
-console.log('С сервера пришли товары: ', products);
+const api = new WebLarekApi(API_URL, settings);
+try {
+  const products = await api.fetchProducts();
+  productsApiModel.productsList = products;
+  console.log("С сервера пришли товары: ", products);
+} catch (err) {
+  console.error(err);
+}

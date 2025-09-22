@@ -183,13 +183,10 @@ Presenter - презентер содержит основную логику п
 ### Слой коммуникации
 
 #### Класс WebLarekApi
-Отвечает за работу с Api приложения WebLarek.
+Отвечает за работу с Api приложения WebLarek. Наследует класс Api.
 
 Конструктор: 
-`constructor(baseApi: IApi): {}` - конструктор принимает данные об интерфейсе IApi.
-
-Поля класса:
-`baseApi: IApi` - данные об Api.
+`constructor(baseUrl: string, options?: RequestInit)` - конструктор вызывает конструктор родителя.
 
 Методы: 
 `async fetchProducts(): Promise<IProduct[]>` - отправка запроса на получение массива товаров с сервера.
