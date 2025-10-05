@@ -5,6 +5,10 @@ export class FormOrder extends FormBase {
     protected buttonCash: HTMLButtonElement;
     protected buttonCard: HTMLButtonElement;
     protected addressInput: HTMLInputElement;
+    protected touched = {
+        address: false,
+        payment: false
+    }
     
     constructor(template: HTMLTemplateElement, events: IEvents) {
         const node = template.content.firstElementChild?.cloneNode(true);
@@ -25,13 +29,22 @@ export class FormOrder extends FormBase {
         if (!address) throw new Error('input[name="address"] не найден');
         this.addressInput = address;
 
+        const submit = this.container.querySelector<HTMLButtonElement>('button[type="submit"]');
+        if (!submit) throw new Error('button[type="submit"] не найден');
+        this.submitButton = submit; 
+
         this.buttonCard.addEventListener('click', () => this.paymentMethod('card'));
         this.buttonCash.addEventListener('click', () => this.paymentMethod('cash'));
 
         this.addressInput.addEventListener('input', () => {
         this.clearErrors();
         this.toggleSubmit(this.validate());
-    });
+        });
+
+        this.submitButton.addEventListener('click', (evt) => {
+            evt.preventDefault();
+            this.events.emit('order:continued');
+        });
     }
 
     protected paymentMethod(payment: 'card' | 'cash') {
@@ -45,6 +58,7 @@ export class FormOrder extends FormBase {
         }
 
         this.clearErrors();
+        this.toggleSubmit(this.validate());
     }
 
     protected validate(): boolean {
@@ -61,4 +75,6 @@ export class FormOrder extends FormBase {
         this.formErrors.textContent = errors.join(' | ');
         return errors.length === 0;
     }
+
+    
 }

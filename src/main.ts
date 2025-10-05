@@ -148,6 +148,8 @@ import { ICardBase } from './components/view/CardBase';
 const events = new EventEmitter();
 
 const cartModel = new Cart();
+const productsCatalog = new ProductCatalog();
+const buyer = new Buyer();
 const header = new HeaderView(document.querySelector('.page__wrapper'), events);
 const modal = new ModalView(document.querySelector('.modal'));
 const gallery = new GalleryView(document.querySelector('.gallery'));
@@ -156,7 +158,6 @@ const cardPreview = new CardFullView(document.querySelector('#card-preview'), ev
 const cardBasket = new CardBasketView(document.querySelector('#card-basket'), events);
 const formOrder = new FormOrder(document.querySelector('#order'), events);
 const formContacts = new FormContacts(document.querySelector('#contacts'), events);
-const productsCatalog = new ProductCatalog();
 const basket = new BasketView(document.querySelector('#basket'), events);
 
 const api = new WebLarekApi(API_URL, settings);
@@ -201,11 +202,14 @@ events.on('card:buy', (data: {card: string} ) => {
   const product = productsCatalog.getProductById(data.card);
 
   const inCart = cartModel.cartProducts.some(item => item.id === product.id)
-  if (inCart ) {
+  if (inCart) {
     cartModel.deleteProduct(product.id);
   } else {
     cartModel.addProduct(product);
+    basket.addItem(cardBasket.render(product));
   }
+
+  basket.toggleSubmit(true);
 
   header.counter = cartModel.cartProducts.length;
 
@@ -213,16 +217,60 @@ events.on('card:buy', (data: {card: string} ) => {
 })
 
 events.on('basket:open', () => {
-  const basket = new BasketView(document.querySelector('#basket'), events);
+  const itemsArray = cartModel.cartProducts.map((item) => {
+    const cardInstance = new CardBasketView(document.querySelector('#card-basket'), events);
+    return cardInstance.render(item);
+  })
 
-  
+  basket.list = itemsArray;
+  basket.price = cartModel.totalPrice(cartModel.cartProducts);
+
+  const count = itemsArray.length;
+  if (count === 0) {
+    basket.toggleSubmit(false);
+    basket.isEmpty();
+  }
 
   modal.content = basket.render();
-
-
-
   modal.open();
 })
 
+events.on('basket:changed', ( data: {card: string} ) => {
+  const product = productsCatalog.getProductById(data.card);
+  cartModel.deleteProduct(product.id);
 
+  const count = cartModel.cartProducts.length;
+  if (count === 0) {
+    basket.toggleSubmit(false);
+    basket.isEmpty();
+  }
 
+  header.counter = cartModel.cartProducts.length;
+
+  basket.price = cartModel.totalPrice(cartModel.cartProducts);
+  modal.content = basket.render();
+})
+
+events.on('order:start', () => {
+  const formOrder = new FormOrder(document.querySelector('#order'), events);
+  modal.content = formOrder.render();
+})
+
+events.on('order:continued', () => {
+  const formContacts = new FormContacts(document.querySelector('#contacts'), events);
+  modal.content = formContacts.render();
+})
+
+events.on('order:contacts', (values) => {
+  const successPopup = new SuccessView(document.querySelector('#success'), events);
+  successPopup.price = cartModel.totalPrice(cartModel.cartProducts);
+  modal.content = successPopup.render();
+  console.log(values)
+})
+
+events.on('order:finished', () => {
+  modal.close();
+  cartModel.clearCart();
+  buyer.clearBuyerData();
+  header.counter = cartModel.cartProducts.length;
+})

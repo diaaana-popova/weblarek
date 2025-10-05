@@ -3,9 +3,7 @@ import { IBuyer } from "../../types";
 export class Buyer {
     private buyer: IBuyer;
 
-    constructor(buyer: IBuyer) {
-        this.buyer = buyer;
-    };
+    constructor() {};
 
     set _payment(paymentType: 'card' | 'cash' | '') {
         this.buyer.payment = paymentType;

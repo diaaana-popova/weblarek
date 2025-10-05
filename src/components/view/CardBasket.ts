@@ -34,7 +34,7 @@ export class CardBasketView extends CardBaseView {
     }
     
     deleteCard(): void {
+        this.events.emit('basket:changed', { card: this.cardId });
         this.container.remove();
     }
-
 }

@@ -44,6 +44,14 @@ export class FormBase extends Component<IOrderFormView> {
 		});
     }
 
+    protected getInputValues() {
+        const values: Record<string, string> = {};
+		this.formInputs.forEach((input) => {
+			values[input.name] = input.value;
+		});
+		return values;
+    }
+
     toggleSubmit(enabled: boolean) {
         this.submitButton.disabled = !enabled;
     }

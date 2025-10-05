@@ -3,7 +3,7 @@ import { IEvents } from "../base/Events";
 import { ICardBase } from "./CardBase";
 
 export interface IBasketView {
-    list: ICardBase[];
+    list: HTMLElement[];
     price: number;
 }
 
@@ -44,6 +44,14 @@ export class BasketView extends Component<IBasketView> {
 
     set list(list: HTMLElement[]) {
         this.basketList.replaceChildren(...list);
+    }
+
+    isEmpty() {
+        this.basketList.innerHTML = '<p class="basket__empty">Корзина пуста</p>'
+    }
+
+    addItem(item: HTMLElement) {
+        this.basketList.prepend(item);
     }
 
     toggleSubmit(enabled: boolean) {

@@ -41,17 +41,9 @@ export class FormContacts extends FormBase {
             this.touched.phone = true;
             const valid = this.validate();
             if (valid) {
-                this.events.emit(`${this.formName}:submit`, this.getInputValues());
+                this.events.emit(`order:contacts`, this.getInputValues());
             }
         });
-    }
-
-    protected getInputValues() {
-        const values: Record<string, string> = {};
-		this.formInputs.forEach((input) => {
-			values[input.name] = input.value;
-		});
-		return values;
     }
 
     protected validate(): boolean {
