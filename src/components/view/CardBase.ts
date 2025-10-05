@@ -1,14 +1,6 @@
 import { Component } from "../base/Component";
+import { ICardBase } from "../../types";
 
-export interface ICardBase {
-    id: string;
-    title: string;
-    price: number | null;
-    category: string;
-    src: string;
-    alt?: string;
-    description: string;
-}
 
 export class CardBaseView extends Component<ICardBase> {
     protected cardTitle: HTMLElement;
@@ -41,10 +33,6 @@ export class CardBaseView extends Component<ICardBase> {
 
     set id(id: string) {
         this.cardId = id;
-    }
-    
-    get id() {
-    return this.cardId;
     }
 
 }

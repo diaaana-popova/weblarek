@@ -5,10 +5,7 @@ export class FormOrder extends FormBase {
     protected buttonCash: HTMLButtonElement;
     protected buttonCard: HTMLButtonElement;
     protected addressInput: HTMLInputElement;
-    protected touched = {
-        address: false,
-        payment: false
-    }
+    private payment: 'card' | 'cash' | '' = '';
     
     constructor(template: HTMLTemplateElement, events: IEvents) {
         const node = template.content.firstElementChild?.cloneNode(true);
@@ -43,11 +40,12 @@ export class FormOrder extends FormBase {
 
         this.submitButton.addEventListener('click', (evt) => {
             evt.preventDefault();
-            this.events.emit('order:continued');
+            this.events.emit('order:continued', this.getOrderValues());
         });
     }
 
     protected paymentMethod(payment: 'card' | 'cash') {
+        this.payment = payment;
         this.buttonCard.classList.remove('button_alt-active');
         this.buttonCash.classList.remove('button_alt-active');
 
@@ -60,6 +58,14 @@ export class FormOrder extends FormBase {
         this.clearErrors();
         this.toggleSubmit(this.validate());
     }
+
+    protected getOrderValues() {
+    const base = this.getInputValues();
+    return {
+        address: base.address ?? '',
+        payment: this.payment,
+    };
+  }
 
     protected validate(): boolean {
         const errors: string[] = [];
@@ -75,6 +81,4 @@ export class FormOrder extends FormBase {
         this.formErrors.textContent = errors.join(' | ');
         return errors.length === 0;
     }
-
-    
 }

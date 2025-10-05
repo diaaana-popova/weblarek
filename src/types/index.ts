@@ -16,9 +16,8 @@ export interface IOrderRequest {
     phone: string;
     address: string;
     total: number;
-    items: IProduct[];
+    items: string[];
 }
-
 
 export interface IProduct {
     id: string;
@@ -33,4 +32,42 @@ export interface IBuyer {
     email: string;
     phone: string;
     address: string
+}
+
+export interface IHeaderView {
+    counter: number;
+}
+
+export interface IModalView {
+    isOpen: boolean;
+    content: HTMLElement;
+}
+
+export interface IGalleryView {
+    catalog: HTMLElement[];
+}
+
+export interface ICardBase {
+    id: string;
+    title: string;
+    price: number | null;
+    category: string;
+    src: string;
+    alt?: string;
+    description: string;
+}
+
+export interface IBasketView {
+    list: HTMLElement[];
+    price: number;
+}
+
+export interface IOrderFormView {
+    isValid: boolean;
+    inputValues: Record<string, string>;
+    errors: Record<string, string>;
+}
+
+export interface ISuccessContentView {
+    total: number;
 }

@@ -4,10 +4,6 @@ import { IEvents } from "../base/Events";
 export class FormContacts extends FormBase {
     protected emailInput: HTMLInputElement;
     protected phoneInput: HTMLInputElement;
-    protected touched = {
-        email: false,
-        phone: false
-    }
     
     constructor(template: HTMLTemplateElement, events: IEvents) {
         const node = template.content.firstElementChild?.cloneNode(true);
@@ -24,23 +20,22 @@ export class FormContacts extends FormBase {
         if (!phone) throw new Error('input[name="phone"] не найден');
         this.phoneInput = phone;
 
-        const touched = (field: 'email' | 'phone') => {
-            if (!this.touched[field] && (field === 'email' ? this.emailInput.value : this.phoneInput.value).trim().length > 0) {
-            this.touched[field] = true;
-        }
+        this.emailInput.addEventListener('input', () => {
         this.clearErrors();
         this.toggleSubmit(this.validate());
-        };
+        });
 
-        this.emailInput.addEventListener('input', () => { touched('email') });
-        this.phoneInput.addEventListener('input', () => { touched('phone') });
+        this.phoneInput.addEventListener('input', () => {
+        this.clearErrors();
+        this.toggleSubmit(this.validate());
+        }); 
 
         this.form.addEventListener('submit', (evt) => {
             evt.preventDefault();
-            this.touched.email = true;
-            this.touched.phone = true;
             const valid = this.validate();
             if (valid) {
+                this.toggleSubmit(false);
+                this.clearErrors();
                 this.events.emit(`order:contacts`, this.getInputValues());
             }
         });
@@ -52,7 +47,7 @@ export class FormContacts extends FormBase {
         const emailCheck = this.emailInput.value.trim();
         const phoneCheck = this.phoneInput.value.trim();
 
-        if (!emailCheck && this.touched.email || !phoneCheck && this.touched.phone) {
+        if (!emailCheck) {
             errors.push('Одно из полей не заполнено');
         }
 

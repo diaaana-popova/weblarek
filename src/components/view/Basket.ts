@@ -1,11 +1,7 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
-import { ICardBase } from "./CardBase";
+import { IBasketView } from "../../types";
 
-export interface IBasketView {
-    list: HTMLElement[];
-    price: number;
-}
 
 export class BasketView extends Component<IBasketView> {
     protected basketList: HTMLUListElement;

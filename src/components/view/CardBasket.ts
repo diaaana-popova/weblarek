@@ -1,9 +1,6 @@
 import { IEvents } from "../base/Events";
 import { CardBaseView } from "./CardBase";
 
-// export interface ICardBasket {
-//     item: number;
-// }
 
 export class CardBasketView extends CardBaseView {
     protected itemNumber: HTMLElement;

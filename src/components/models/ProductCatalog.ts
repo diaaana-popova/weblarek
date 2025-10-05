@@ -7,17 +7,17 @@ export class ProductCatalog {
     protected selectedId: string | null;
     protected events: IEvents;
 
-    constructor(products: IProduct[] = []) {
+    constructor(products: IProduct[] = [], events: IEvents) {
         this.products = products;
         this.itemsById = new Map(products.map(item => [item.id, item]));
         this.selectedId = null;
-        // this.events = events;
+        this.events = events;
     }
 
     set productsList(list: IProduct[]) {
         this.products = list;
         this.itemsById = new Map(list.map(item => [item.id, item]));
-        // this.events.emit('cards:loaded');
+        this.events.emit('catalog:changed');
     }
 
     get productsList() {
@@ -38,7 +38,8 @@ export class ProductCatalog {
         if (selectedProduct) {
             this.selectedId = itemId;
         }
-        // this.events.emit('card:selected');
+
+        this.events.emit('card:selected');
     }
 
     get selectedProduct(): IProduct | null {

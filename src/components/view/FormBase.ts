@@ -1,11 +1,7 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
+import { IOrderFormView } from "../../types";
 
-export interface IOrderFormView {
-    isValid: boolean;
-    inputValues: Record<string, string>;
-    errors: Record<string, string>;
-}
 
 export class FormBase extends Component<IOrderFormView> {
     protected submitButton: HTMLButtonElement;

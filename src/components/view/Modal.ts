@@ -1,10 +1,6 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
-
-export interface IModalView {
-    isOpen: boolean;
-    content: HTMLElement;
-}
+import { IModalView } from "../../types";
 
 export class ModalView extends Component<IModalView> {
     protected contentElement: HTMLElement;
@@ -13,7 +9,6 @@ export class ModalView extends Component<IModalView> {
 
     constructor(protected container: HTMLElement) {
         super(container);
-        // this.events = events;
     
         const content = this.container.querySelector<HTMLElement>('.modal__content');
         if (!content) throw new Error('.modal__content не найден');

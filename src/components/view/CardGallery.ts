@@ -1,14 +1,7 @@
 import { CDN_URL } from "../../utils/constants";
 import { IEvents } from "../base/Events";
-import { CardBaseView, ICardBase } from "./CardBase";
+import { CardBaseView } from "./CardBase";
 import { categoryMap } from "../../utils/constants";
-
-// export interface ICardCatalog {
-//     category: string;
-//     src: string;
-//     alt?: string;
-// }
-
 
 export class CardGalleryView extends CardBaseView {
     protected cardCategory: HTMLElement;
@@ -37,7 +30,7 @@ export class CardGalleryView extends CardBaseView {
     }
 
     setBackground() {
-        this.cardCategory.classList.remove('card__category_soft');
+        this.cardCategory.className = 'card__category';
 
         const keys = Object.keys(categoryMap);
 
@@ -58,4 +51,5 @@ export class CardGalleryView extends CardBaseView {
     set image(image: string) {
         this.cardImg.src = `${CDN_URL}${image}`;
     }
+
 }

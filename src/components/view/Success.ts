@@ -1,9 +1,7 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
+import { ISuccessContentView } from "../../types";
 
-export interface ISuccessContentView {
-    total: number;
-}
 
 export class SuccessView extends Component<ISuccessContentView> {
     protected successDescription: HTMLElement;

@@ -1,15 +1,8 @@
 import { IEvents } from "../base/Events";
 import { CardBaseView } from "./CardBase";
 import { CDN_URL } from "../../utils/constants";
-import { ICardBase } from "./CardBase";
 import { categoryMap } from "../../utils/constants";
 
-// export interface ICardFullPreview {
-//     category: string;
-//     src: string;
-//     alt?: string;
-//     description: string;
-// }
 
 export class CardFullView extends CardBaseView {
     protected cardCategory: HTMLElement;
@@ -17,7 +10,6 @@ export class CardFullView extends CardBaseView {
     protected cardDescription: HTMLElement;
     protected basketButton: HTMLButtonElement;
     protected events: IEvents;
-    protected card: ICardBase;
     
     constructor(template: HTMLTemplateElement, events: IEvents) {
         const node = template.content.firstElementChild?.cloneNode(true);
@@ -49,7 +41,7 @@ export class CardFullView extends CardBaseView {
     }
     
     setBackground() {
-        this.cardCategory.classList.remove('card__category_other');
+        this.cardCategory.className = 'card__category';
 
         const keys = Object.keys(categoryMap);
 
@@ -83,10 +75,4 @@ export class CardFullView extends CardBaseView {
     itemInBasket() {
         this.basketButton.textContent = 'Удалить из корзины';
     }
-
-//     не хватает реализации:
-//     если товар находится в корзине, кнопка должна быть заменена на «Удалить из корзины»;
-// при нажатии на кнопку «Удалить из корзины» товар удаляется из корзины;
-// после нажатия кнопки модальное окно закрывается;
-// если у товара нет цены, кнопка в карточке должна быть заблокирована и иметь название «Недоступно».
 }
