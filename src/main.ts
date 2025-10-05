@@ -157,6 +157,7 @@ const cardBasket = new CardBasketView(document.querySelector('#card-basket'), ev
 const formOrder = new FormOrder(document.querySelector('#order'), events);
 const formContacts = new FormContacts(document.querySelector('#contacts'), events);
 const productsCatalog = new ProductCatalog();
+const basket = new BasketView(document.querySelector('#basket'), events);
 
 const api = new WebLarekApi(API_URL, settings);
 
@@ -178,15 +179,50 @@ try {
   console.error(err);
 }
 
-events.on('card:open', (card) => {
+events.on('card:open', (data: {card: string} ) => {
+  const product = productsCatalog.getProductById(data.card);
+  const cardPreview = new CardFullView(document.querySelector('#card-preview'), events);
 
-  console.log(card);
+  if (product.price === null) {
+    cardPreview.disableButton();
+  }
+
+  const inCart = cartModel.cartProducts.some(item => item.id === product.id)
+
+  if (inCart) {
+    cardPreview.itemInBasket();
+  }
+
+  modal.content = cardPreview.render(product);
+  modal.open();
+})
+
+events.on('card:buy', (data: {card: string} ) => {
+  const product = productsCatalog.getProductById(data.card);
+
+  const inCart = cartModel.cartProducts.some(item => item.id === product.id)
+  if (inCart ) {
+    cartModel.deleteProduct(product.id);
+  } else {
+    cartModel.addProduct(product);
+  }
+
+  header.counter = cartModel.cartProducts.length;
+
+  modal.close();
+})
+
+events.on('basket:open', () => {
+  const basket = new BasketView(document.querySelector('#basket'), events);
 
   
-  modal.open();
 
-  // const { card } = data;
-  // const { title, category, image, price } = productsCatalog.getProductById("854cef69-976d-4c2a-a18c-2aa45046c390");
-  // const _card = { title, category, image, price };
-  // cardPreview.render(_card);
+  modal.content = basket.render();
+
+
+
+  modal.open();
 })
+
+
+

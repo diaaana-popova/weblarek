@@ -2,6 +2,7 @@ import { IEvents } from "../base/Events";
 import { CardBaseView } from "./CardBase";
 import { CDN_URL } from "../../utils/constants";
 import { ICardBase } from "./CardBase";
+import { categoryMap } from "../../utils/constants";
 
 // export interface ICardFullPreview {
 //     category: string;
@@ -43,12 +44,27 @@ export class CardFullView extends CardBaseView {
         this.basketButton = button;
 
         this.basketButton.addEventListener('click', () => {
-            this.events.emit('card:tobasket', { card: this.cardCategory } );
+            this.events.emit('card:buy', { card: this.cardId } );
+        })
+    }
+    
+    setBackground() {
+        this.cardCategory.classList.remove('card__category_other');
+
+        const keys = Object.keys(categoryMap);
+
+        keys.forEach((element) => {
+            if (this.cardCategory.textContent === element) {
+                const el = categoryMap[element];
+                this.cardCategory.classList.add(el);
+            } 
         })
     }
     
     set category(category: string) {
         this.cardCategory.textContent = category;
+
+        this.setBackground();
     }
     
     set image(image: string) {
@@ -57,6 +73,15 @@ export class CardFullView extends CardBaseView {
 
     set description(description: string) {
         this.cardDescription.textContent = description;
+    }
+
+    disableButton() {
+        this.basketButton.setAttribute('disabled', '');
+        this.basketButton.textContent = 'Недоступно';
+    }
+
+    itemInBasket() {
+        this.basketButton.textContent = 'Удалить из корзины';
     }
 
 //     не хватает реализации:

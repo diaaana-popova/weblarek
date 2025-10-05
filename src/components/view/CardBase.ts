@@ -13,6 +13,7 @@ export interface ICardBase {
 export class CardBaseView extends Component<ICardBase> {
     protected cardTitle: HTMLElement;
     protected cardPrice: HTMLElement;
+    protected cardId: string;
     
     constructor(protected container: HTMLElement) {
         super(container);
@@ -37,4 +38,13 @@ export class CardBaseView extends Component<ICardBase> {
             this.cardPrice.textContent = `Бесценно`;
         }
     }
+
+    set id(id: string) {
+        this.cardId = id;
+    }
+    
+    get id() {
+    return this.cardId;
+    }
+
 }

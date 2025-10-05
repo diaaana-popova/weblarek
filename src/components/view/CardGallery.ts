@@ -14,7 +14,6 @@ export class CardGalleryView extends CardBaseView {
     protected cardCategory: HTMLElement;
     protected cardImg: HTMLImageElement;
     protected events: IEvents;
-    protected cardId: string;
     
     constructor(template: HTMLTemplateElement, events: IEvents) {
         const node = template.content.firstElementChild?.cloneNode(true);
@@ -33,7 +32,7 @@ export class CardGalleryView extends CardBaseView {
         this.cardImg = image;
 
         this.container.addEventListener('click', () => {
-            this.events.emit('card:open', { card: this } );
+            this.events.emit('card:open', { card: this.cardId } );
         });
     }
 
@@ -59,12 +58,4 @@ export class CardGalleryView extends CardBaseView {
     set image(image: string) {
         this.cardImg.src = `${CDN_URL}${image}`;
     }
-
-    // set _cardId(id) {
-	// 	this.cardId = id;
-	// }
-
-	// get _cardId() {
-	// 	return this.cardId;
-	// }
 }

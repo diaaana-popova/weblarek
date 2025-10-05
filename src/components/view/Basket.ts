@@ -13,8 +13,12 @@ export class BasketView extends Component<IBasketView> {
     protected basketPrice: HTMLElement;
     protected events: IEvents;
 
-    constructor(protected container: HTMLElement, events: IEvents) {
-        super(container);
+    constructor(template: HTMLTemplateElement, events: IEvents) {
+        const node = template.content.firstElementChild?.cloneNode(true);
+        if (!(node instanceof HTMLElement)) {
+            throw new Error('В <template> нет корневого HTMLElement');
+        }
+        super(node);
         this.events = events;
 
         const list = this.container.querySelector<HTMLUListElement>('.basket__list');
@@ -38,8 +42,8 @@ export class BasketView extends Component<IBasketView> {
         this.basketPrice.textContent = `${price} синапсов`;
     }
 
-    set list(list: HTMLUListElement) {
-        this.basketList.replaceChildren(list);
+    set list(list: HTMLElement[]) {
+        this.basketList.replaceChildren(...list);
     }
 
     toggleSubmit(enabled: boolean) {
