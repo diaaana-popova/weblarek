@@ -129,8 +129,8 @@ events.on('order:continued', (data: { address: string; payment: 'card' | 'cash' 
   const formContacts = new FormContacts(document.querySelector('#contacts'), events);
   modal.content = formContacts.render();
 
-  buyer._address = data.address;
-  buyer._payment = data.payment;
+  buyer.address = data.address;
+  buyer.payment = data.payment;
 })
 
 events.on('order:contacts', (data: { email: string; phone: string}) => {
@@ -138,8 +138,8 @@ events.on('order:contacts', (data: { email: string; phone: string}) => {
   successPopup.price = cartModel.totalPrice(cartModel.cartProducts);
   modal.content = successPopup.render();
 
-  buyer._email = data.email;
-  buyer._phone = data.phone;
+  buyer.email = data.email;
+  buyer.phone = data.phone;
 
   const items = cartModel.cartProducts;
   const itemsIds = cartModel.cartProducts.map(p => p.id);

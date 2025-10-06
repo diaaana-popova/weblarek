@@ -3,20 +3,17 @@ import { IEvents } from "../base/Events";
 
 export class ProductCatalog {
     protected products: IProduct[];
-    protected itemsById: Map<string, IProduct>;
     protected selectedId: string | null;
     protected events: IEvents;
 
     constructor(products: IProduct[] = [], events: IEvents) {
         this.products = products;
-        this.itemsById = new Map(products.map(item => [item.id, item]));
         this.selectedId = null;
         this.events = events;
     }
 
     set productsList(list: IProduct[]) {
         this.products = list;
-        this.itemsById = new Map(list.map(item => [item.id, item]));
         this.events.emit('catalog:changed');
     }
 
@@ -25,7 +22,7 @@ export class ProductCatalog {
     }
 
     getProductById(itemId: string): IProduct | undefined {
-        return this.itemsById.get(itemId);
+        return this.products.find(product => product.id === itemId);
     }
 
     set selectedProductId(itemId: string | null) {
@@ -46,6 +43,6 @@ export class ProductCatalog {
         if (!this.selectedId) {
             return null;
         }
-            return this.itemsById.get(this.selectedId) ?? null;
-        }
+            return this.products[this.selectedId] ?? null;
     }
+}

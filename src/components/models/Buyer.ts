@@ -15,22 +15,22 @@ export class Buyer {
         };
     };
 
-    set _payment(paymentType: 'card' | 'cash' | '') {
+    set payment(paymentType: 'card' | 'cash' | '') {
         this.buyer.payment = paymentType ?? '';
         this.events.emit('buyer:changed');
     }
 
-    set _email(email: string) {
+    set email(email: string) {
         this.buyer.email = email ?? '';
         this.events.emit('buyer:changed');
     }
 
-    set _phone(phone: string) {
+    set phone(phone: string) {
         this.buyer.phone = phone ?? '';
         this.events.emit('buyer:changed');
     }
 
-    set _address(address: string) {
+    set address(address: string) {
         this.buyer.address = address ?? '';
         this.events.emit('buyer:changed');
     }
@@ -48,11 +48,29 @@ export class Buyer {
         this.events.emit('buyer:changed');
     }
 
-    buyerDataValidation(): boolean {
-        if ((this.buyer.payment === '') || (this.buyer.email === '') || (this.buyer.phone === '') || (this.buyer.address === '')) {
-            return false;
-        } else {
-            return true;
+    buyerDataValidation(): Record<keyof IBuyer, string> {
+        const errors: Partial<Record<keyof IBuyer, string>> = {};
+
+        if (!this.buyer.payment) {
+            errors.payment = 'Не указан способ оплаты';
         }
+
+        if (!this.buyer.email) {
+            errors.email = 'Не указан email';
+        }
+
+        if (!this.buyer.phone) {
+            errors.phone = 'Не указан телефон';
+        }
+
+        if (!this.buyer.address) {
+            errors.address = 'Не указан адрес';
+        }
+
+        return errors as Record<keyof IBuyer, string>;
+    }
+
+    isValid(): boolean {
+        return Object.keys(this.buyerDataValidation()).length === 0;
     }
 }
