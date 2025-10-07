@@ -2,6 +2,7 @@ import { CDN_URL } from "../../utils/constants";
 import { IEvents } from "../base/Events";
 import { CardBaseView } from "./CardBase";
 import { categoryMap } from "../../utils/constants";
+import { ensureElement } from "../../utils/utils";
 
 export class CardGalleryView extends CardBaseView {
     protected cardCategory: HTMLElement;
@@ -9,27 +10,18 @@ export class CardGalleryView extends CardBaseView {
     protected events: IEvents;
     
     constructor(template: HTMLTemplateElement, events: IEvents) {
-        const node = template.content.firstElementChild?.cloneNode(true);
-        if (!(node instanceof HTMLElement)) {
-            throw new Error('В <template> нет корневого HTMLElement');
-        }
-        super(node);
+        super(template);
+
         this.events = events;
-        
-        const category = this.container.querySelector<HTMLElement>('.card__category');
-        if (!category) throw new Error('.card__category не найден');
-        this.cardCategory = category;
-        
-        const image = this.container.querySelector<HTMLImageElement>('.card__image');
-        if (!image) throw new Error('.card__image не найден');
-        this.cardImg = image;
+        this.cardCategory = ensureElement<HTMLElement>('.card__category', this.container);
+        this.cardImg = ensureElement<HTMLImageElement>('.card__image', this.container);
 
         this.container.addEventListener('click', () => {
             this.events.emit('card:open', { card: this.cardId } );
         });
     }
 
-    setBackground() {
+    protected setBackground() {
         this.cardCategory.className = 'card__category';
 
         const keys = Object.keys(categoryMap);

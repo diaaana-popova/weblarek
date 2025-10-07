@@ -1,6 +1,7 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 import { IBasketView } from "../../types";
+import { ensureElement } from "../../utils/utils";
 
 
 export class BasketView extends Component<IBasketView> {
@@ -10,28 +11,19 @@ export class BasketView extends Component<IBasketView> {
     protected events: IEvents;
 
     constructor(template: HTMLTemplateElement, events: IEvents) {
-        const node = template.content.firstElementChild?.cloneNode(true);
-        if (!(node instanceof HTMLElement)) {
-            throw new Error('В <template> нет корневого HTMLElement');
-        }
-        super(node);
+        super(template);
+
         this.events = events;
-
-        const list = this.container.querySelector<HTMLUListElement>('.basket__list');
-        if (!list) throw new Error('.basket__list не найден');
-        this.basketList = list;
-
-        const basket = this.container.querySelector<HTMLButtonElement>('.basket__button');
-        if (!basket) throw new Error('.basket__button не найден');
-        this.basketButton = basket;
-
-        const price = this.container.querySelector<HTMLElement>('.basket__price');
-        if (!price) throw new Error('.basket__price не найден');
-        this.basketPrice = price;
+        this.basketList = ensureElement<HTMLUListElement>('.basket__list', this.container);
+        this.basketButton = ensureElement<HTMLButtonElement>('.basket__button', this.container);
+        this.basketPrice = ensureElement<HTMLElement>('.basket__price', this.container);
 
         this.basketButton.addEventListener('click', () => {
             this.events.emit('order:start');
         })
+
+        this.isEmpty();
+        this.toggleSubmit(false);
     }
 
     set price(price: number) {
@@ -39,18 +31,20 @@ export class BasketView extends Component<IBasketView> {
     }
 
     set list(list: HTMLElement[]) {
-        this.basketList.replaceChildren(...list);
+        if (list.length === 0) {
+            this.isEmpty();
+            this.toggleSubmit(false);
+        } else {
+            this.basketList.replaceChildren(...list);
+            this.toggleSubmit(true);
+        }
     }
 
-    isEmpty() {
+    protected isEmpty() {
         this.basketList.innerHTML = '<p class="basket__empty">Корзина пуста</p>'
     }
 
-    addItem(item: HTMLElement) {
-        this.basketList.prepend(item);
-    }
-
-    toggleSubmit(enabled: boolean) {
+    protected toggleSubmit(enabled: boolean) {
         this.basketButton.disabled = !enabled;
     }
 }

@@ -1,11 +1,13 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 import { IOrderFormView } from "../../types";
+import { ensureElement } from "../../utils/utils";
+import { ensureAllElements } from "../../utils/utils";
 
 
 export class FormBase extends Component<IOrderFormView> {
     protected submitButton: HTMLButtonElement;
-    protected formInputs: NodeListOf<HTMLInputElement>;
+    protected formInputs: HTMLInputElement[];
     protected formName: string;
     protected form: HTMLFormElement;
     protected formErrors: HTMLElement;
@@ -17,21 +19,13 @@ export class FormBase extends Component<IOrderFormView> {
 
         this.form = container instanceof HTMLFormElement
             ? container
-            : (container.querySelector<HTMLFormElement>('.form') ?? (() => { throw new Error('.form не найден')})());
+            : ensureElement<HTMLFormElement>('.form', this.container);
 
         this.formName = this.form.getAttribute('name') ?? 'form';
 
-        const submit = this.container.querySelector<HTMLButtonElement>('button[type="submit"]');
-        if (!submit) throw new Error('button[type="submit"] не найден');
-        this.submitButton = submit; 
-
-        const inputs = this.container.querySelectorAll<HTMLInputElement>('.form__input');
-        this.formInputs = inputs;
-        if (this.formInputs.length === 0) throw new Error('.form__input не найден');
-
-        const error = this.container.querySelector<HTMLElement>('.form__errors');
-        if (!error) throw new Error('.form__errors не найден');
-        this.formErrors = error;
+        this.submitButton = ensureElement<HTMLButtonElement>('button[type="submit"]', this.container);
+        this.formInputs = ensureAllElements<HTMLInputElement>('.form__input', this.container);
+        this.formErrors = ensureElement<HTMLElement>('.form__errors', this.container);
     }
 
     set inputValues(values: Record<string, string>) {
@@ -48,11 +42,18 @@ export class FormBase extends Component<IOrderFormView> {
 		return values;
     }
 
-    toggleSubmit(enabled: boolean) {
+    set valid(enabled: boolean) {
         this.submitButton.disabled = !enabled;
     }
 
-    clearErrors() {
-        this.formErrors.textContent = '';
+    set errors(data: Record<string, string> | string) {
+        if (typeof data === 'string') {
+            this.formErrors.textContent = data;
+        } else {
+            const message = Object.values(data)
+            .filter(Boolean)
+            .join(' | ');
+        this.formErrors.textContent = message;
+        }
     }
 };

@@ -1,6 +1,7 @@
 import { Component } from "../base/Component";
 import { IGalleryView } from "../../types";
 
+
 export class GalleryView extends Component<IGalleryView> {
     constructor(protected container: HTMLElement) {
         super(container);

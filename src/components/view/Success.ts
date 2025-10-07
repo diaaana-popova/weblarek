@@ -1,6 +1,7 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 import { ISuccessContentView } from "../../types";
+import { ensureElement } from "../../utils/utils";
 
 
 export class SuccessView extends Component<ISuccessContentView> {
@@ -9,20 +10,11 @@ export class SuccessView extends Component<ISuccessContentView> {
     protected events: IEvents;
     
     constructor(protected template: HTMLTemplateElement, events: IEvents) {
-        const node = template.content.firstElementChild?.cloneNode(true);
-        if (!(node instanceof HTMLElement)) {
-            throw new Error('В <template> нет корневого HTMLElement');
-        }
-        super(node);
+        super(template);
         this.events = events;
-        
-        const description = this.container.querySelector<HTMLElement>('.order-success__description');
-        if (!description) throw new Error('.order-success__description не найден');
-        this.successDescription = description;
-        
-        const button = this.container.querySelector<HTMLButtonElement>('.order-success__close');
-        if (!button) throw new Error('.order-success__close не найден');
-        this.successButton = button;
+
+        this.successDescription = ensureElement<HTMLElement>('.order-success__description', this.container);
+        this.successButton = ensureElement<HTMLButtonElement>('.order-success__close', this.container);
 
         this.successButton.addEventListener('click', (evt) => {
             evt.preventDefault();

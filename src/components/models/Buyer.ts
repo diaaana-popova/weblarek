@@ -37,7 +37,6 @@ export class Buyer {
 
     get buyerData(): IBuyer {
         return this.buyer;
-
     }
     
     clearBuyerData(): void {

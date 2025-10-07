@@ -1,6 +1,7 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 import { IHeaderView } from "../../types";
+import { ensureElement } from "../../utils/utils";
 
 
 export class HeaderView extends Component<IHeaderView> {
@@ -12,13 +13,8 @@ export class HeaderView extends Component<IHeaderView> {
         super(container);
         this.events = events;
 
-        const counter = this.container.querySelector<HTMLElement>('.header__basket-counter');
-        if (!counter) throw new Error('.header__basket-counter не найден');
-        this.counterElement = counter;
-
-        const basket = this.container.querySelector<HTMLButtonElement>('.header__basket');
-        if (!basket) throw new Error('.header__basket не найден');
-        this.basketButton = basket;
+        this.counterElement = ensureElement<HTMLElement>('.header__basket-counter', this.container);
+        this.basketButton = ensureElement<HTMLButtonElement>('.header__basket', this.container);
 
         this.basketButton.addEventListener('click', () => this.events.emit('basket:open'));
     }

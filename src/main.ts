@@ -15,24 +15,35 @@ import { EventEmitter } from './components/base/Events';
 import { SuccessView } from './components/view/Success';
 import { FormOrder } from './components/view/FormOrder';
 import { FormContacts } from './components/view/FormContacts';
-import { IOrderRequest } from './types';
+import { IBuyer, IOrderRequest } from './types';
+import { cloneTemplate, ensureElement } from './utils/utils';
 
 const events = new EventEmitter();
 
-const cartModel = new Cart([], events);
+const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');
+const catalogCardTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
+const previewCardTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
+const basketCardTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
+const successTemplate = ensureElement<HTMLTemplateElement>('#success');
+const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
+const contactsTemplate = ensureElement<HTMLTemplateElement>('#contacts');
+
 const productsCatalog = new ProductCatalog([], events);
+const cartModel = new Cart([], events);
 const buyer = new Buyer(events);
 const header = new HeaderView(document.querySelector('.page__wrapper'), events);
 const modal = new ModalView(document.querySelector('.modal'));
 const gallery = new GalleryView(document.querySelector('.gallery'));
-const cardBasket = new CardBasketView(document.querySelector('#card-basket'), events);
-const basket = new BasketView(document.querySelector('#basket'), events);
+const formOrder = new FormOrder(cloneTemplate(orderTemplate), events);
+const formContacts = new FormContacts(cloneTemplate(contactsTemplate), events);
+const successPopup = new SuccessView(cloneTemplate(successTemplate), events);
+const basket = new BasketView(cloneTemplate(basketTemplate), events);
 
 const api = new WebLarekApi(API_URL, settings);
 
-events.on('cards:loaded', () => {
+events.on('catalog:changed', () => {
   const cardsArray = productsCatalog.productsList.map((card) => {
-    const cardInstance = new CardGalleryView(document.querySelector('#card-catalog'), events);
+    const cardInstance = new CardGalleryView(cloneTemplate(catalogCardTemplate), events);
     return cardInstance.render(card);
   })
 
@@ -43,14 +54,13 @@ try {
   const products = await api.fetchProducts();
   productsCatalog.productsList = products;
   console.log("С сервера пришли товары: ", products);
-  events.emit('cards:loaded');
 } catch (err) {
   console.error(err);
 }
 
 events.on('card:open', (data: {card: string} ) => {
   const product = productsCatalog.getProductById(data.card);
-  const cardPreview = new CardFullView(document.querySelector('#card-preview'), events);
+  const cardPreview = new CardFullView(cloneTemplate(previewCardTemplate), events);
 
   if (product.price === null) {
     cardPreview.disableButton();
@@ -69,37 +79,29 @@ events.on('card:open', (data: {card: string} ) => {
 events.on('card:buy', (data: {card: string} ) => {
   const product = productsCatalog.getProductById(data.card);
 
-  const inCart = cartModel.cartProducts.some(item => item.id === product.id)
+  const inCart = cartModel.cartProducts.some(item => item.id === product.id);
   if (inCart) {
     cartModel.deleteProduct(product.id);
   } else {
     cartModel.addProduct(product);
-    basket.addItem(cardBasket.render(product));
   }
-
-  basket.toggleSubmit(true);
-
-  header.counter = cartModel.cartProducts.length;
 
   modal.close();
 })
 
-events.on('basket:open', () => {
+events.on('cart:changed', () => {
   const itemsArray = cartModel.cartProducts.map((item, index) => {
-    const cardInstance = new CardBasketView(document.querySelector('#card-basket'), events);
+    const cardInstance = new CardBasketView(cloneTemplate(basketCardTemplate), events);
     cardInstance.counter = index + 1;
     return cardInstance.render(item);
   })
 
   basket.list = itemsArray;
+  header.counter = cartModel.cartQuantity;
   basket.price = cartModel.totalPrice(cartModel.cartProducts);
+})
 
-  const count = itemsArray.length;
-  if (count === 0) {
-    basket.toggleSubmit(false);
-    basket.isEmpty();
-  }
-
+events.on('basket:open', () => {
   modal.content = basket.render();
   modal.open();
 })
@@ -107,47 +109,44 @@ events.on('basket:open', () => {
 events.on('basket:changed', ( data: {card: string} ) => {
   const product = productsCatalog.getProductById(data.card);
   cartModel.deleteProduct(product.id);
-
-  const count = cartModel.cartProducts.length;
-  if (count === 0) {
-    basket.toggleSubmit(false);
-    basket.isEmpty();
-  }
-
-  header.counter = cartModel.cartProducts.length;
-
-  basket.price = cartModel.totalPrice(cartModel.cartProducts);
-  modal.content = basket.render();
 })
 
 events.on('order:start', () => {
-  const formOrder = new FormOrder(document.querySelector('#order'), events);
   modal.content = formOrder.render();
-})
+  }
+)
 
-events.on('order:continued', (data: { address: string; payment: 'card' | 'cash' | '' }) => {
-  const formContacts = new FormContacts(document.querySelector('#contacts'), events);
+events.on('order:continued', () => {
   modal.content = formContacts.render();
-
-  buyer.address = data.address;
-  buyer.payment = data.payment;
+  formOrder.valid = buyer.isValid();
 })
 
-events.on('order:contacts', (data: { email: string; phone: string}) => {
-  const successPopup = new SuccessView(document.querySelector('#success'), events);
-  successPopup.price = cartModel.totalPrice(cartModel.cartProducts);
-  modal.content = successPopup.render();
+events.on('order:field-changed', (data: { field: keyof IBuyer, value: string }) => {
 
-  buyer.email = data.email;
-  buyer.phone = data.phone;
+  const { field, value } = data;
 
+  if (field === 'payment') {
+    buyer.payment = value as 'card' | 'cash' | '';
+  } else if (field === 'email') {
+    buyer.email = value;
+  } else if (field === 'phone') {
+    buyer.phone = value;
+  } else if (field === 'address') {
+    buyer.address = value;
+  }
+
+  formOrder.errors = buyer.buyerDataValidation()[data.field] ?? '';
+  formContacts.errors = buyer.buyerDataValidation()[data.field] ?? '';
+
+  const errorsAll = buyer.buyerDataValidation();
+  formOrder.valid = !('payment' in errorsAll || 'address' in errorsAll);
+
+  formContacts.valid = buyer.isValid();
+});
+
+events.on('order:contacts', () => {
   const items = cartModel.cartProducts;
   const itemsIds = cartModel.cartProducts.map(p => p.id);
-
-  if (buyer.buyerData.payment !== 'card' && buyer.buyerData.payment !== 'cash') {
-    console.warn('Способ оплаты не выбран');
-    return;
-  }
 
   const orderData: IOrderRequest = {
       payment: buyer.buyerData.payment,
@@ -161,15 +160,21 @@ events.on('order:contacts', (data: { email: string; phone: string}) => {
   api.createOrder(orderData)
     .then((response) => {
       console.log('Заказ успешно оформлен:', response);
+      modal.content = successPopup.render();
+      successPopup.price = response.total;
+      cartModel.clearCart();
+      header.counter = cartModel.cartQuantity;
+      formOrder.inputValues = { values: ''};
+      
+      formContacts.inputValues = { values: ''};
+      buyer.clearBuyerData();
     })
     .catch((err) => {
       console.log('Ошибка при отправке заказа:', err);
     })
 });
 
+
 events.on('order:finished', () => {
   modal.close();
-  cartModel.clearCart();
-  header.counter = cartModel.cartProducts.length;
-  buyer.clearBuyerData();
-})
+});

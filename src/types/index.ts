@@ -11,7 +11,7 @@ export interface IProductResponse {
 }
 
 export interface IOrderRequest {
-    payment: 'card' | 'cash';
+    payment: 'card' | 'cash' | '';
     email: string;
     phone: string;
     address: string;

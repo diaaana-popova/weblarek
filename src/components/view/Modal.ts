@@ -1,6 +1,7 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 import { IModalView } from "../../types";
+import { ensureElement } from "../../utils/utils";
 
 export class ModalView extends Component<IModalView> {
     protected contentElement: HTMLElement;
@@ -9,14 +10,9 @@ export class ModalView extends Component<IModalView> {
 
     constructor(protected container: HTMLElement) {
         super(container);
-    
-        const content = this.container.querySelector<HTMLElement>('.modal__content');
-        if (!content) throw new Error('.modal__content не найден');
-        this.contentElement = content;
-    
-        const close = this.container.querySelector<HTMLButtonElement>('.modal__close');
-        if (!close) throw new Error('.modal__close не найден');
-        this.closeButton = close;
+
+        this.contentElement = ensureElement<HTMLElement>('.modal__content', this.container);
+        this.closeButton = ensureElement<HTMLButtonElement>('.modal__close', this.container);
     
         this.closeButton.addEventListener('click', this.close.bind(this));
 
